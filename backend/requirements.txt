@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+langchain
+langchain-community
+httpx
+pytest
+SQLAlchemy
+python-jose[cryptography]
+python-multipart
+bcrypt
+cohere
+qdrant-client>=1.7.0
+fastembed
+pydantic-settings
+psycopg2-binary
+alembic
