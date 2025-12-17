@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **I. Content Fidelity**: All generated content is verifiable against the source material.
+- [ ] **II. Modular and Clean Architecture**: The proposed design demonstrates clear separation of concerns and modularity.
+- [ ] **III. Structured Educational Design**: The feature aligns with the structured educational format (theory, examples, exercises, assessments).
+- [ ] **IV. Testability and Reproducibility**: The plan includes a clear testing and documentation strategy.
+- [ ] **V. Seamless AI Integration**: AI features are well-integrated and enhance the user experience.
 
 ## Project Structure
 

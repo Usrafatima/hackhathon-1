@@ -1,0 +1,1 @@
+Start-Process -FilePath "D:\governer course\hackhathon 1\humanoid-robott-book\venv\Scripts\python.exe" -ArgumentList "D:\governer course\hackhathon 1\humanoid-robott-book\mcp_server.py" -NoNewWindow

@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: RAG Chatbot API
+  version: 1.0.0
+  description: API for the AI-Native RAG Chatbot for the Humanoid Robotics Textbook.
+
+paths:
+  /ingest:
+    post:
+      summary: Ingest and Process Book Content
+      description: Triggers a background process to read the book content, chunk it, generate embeddings using Cohere, and store them in the Qdrant vector database.
+      responses:
+        '202':
+          description: Accepted. Ingestion process started.
+        '500':
+          description: Internal Server Error.
+
+  /chat/book:
+    post:
+      summary: Chat in Book-Wide Mode
+      description: Receives a user query and returns a response generated from the entire book's content.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  example: "How does the middleware for robot control work?"
+                session_id:
+                  type: string
+                  format: uuid
+                  description: "(Optional) The ID of the current chat session."
+      responses:
+        '200':
+          description: Successful response from the chatbot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /chat/selection:
+    post:
+      summary: Chat in Selection-Only Mode
+      description: Receives a user query and a selected text excerpt, and returns a response generated *only* from that excerpt.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  example: "What does this paragraph mean for sensor simulation?"
+                selected_text:
+                  type: string
+                  example: "The simulation of sensors involves creating a virtual representation of the sensor's output..."
+                session_id:
+                  type: string
+                  format: uuid
+                  description: "(Optional) The ID of the current chat session."
+      responses:
+        '200':
+          description: Successful response from the chatbot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '500':
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ChatResponse:
+      type: object
+      properties:
+        response_text:
+          type: string
+          example: "The middleware for robot control acts as a communication layer..."
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              chapter_title:
+                type: string
+                example: "The Robotic Nervous System: ROS 2"
+              section_title:
+                type: string
+                example: "Middleware for Robot Control"
+              url:
+                type: string
+                example: "/docs/Module1/middleware-for-robot-control"
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: "Sorry, I'm having trouble connecting right now. Please try again in a moment."

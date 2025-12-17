@@ -1,0 +1,159 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+:root {
+  --custom-color-primary: #00F5A0;
+  --custom-color-secondary: #0A0A0A;
+  --custom-color-accent: #FF004F;
+  --custom-color-background: #0F0F0F;
+  --custom-color-text: #E8FFF5;
+
+  --ifm-color-primary: var(--custom-color-primary);
+  --ifm-color-primary-dark: #00E090; /* Slightly darker primary */
+  --ifm-color-primary-darker: #00CC80; /* Even darker */
+  --ifm-color-primary-darkest: #00A060; /* Darkest primary */
+  --ifm-color-primary-light: #00FFB0; /* Slightly lighter primary */
+  --ifm-color-primary-lighter: #00FFC0; /* Even lighter */
+  --ifm-color-primary-lightest: #00FFD0; /* Lightest primary */
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-font-family-base: 'Roboto', sans-serif;
+
+  /* Background and text colors */
+  --ifm-background-color: var(--custom-color-background);
+  --ifm-text-color: var(--custom-color-text);
+  --ifm-color-emphasis-100: var(--custom-color-text);
+  --ifm-color-emphasis-200: var(--custom-color-text);
+  --ifm-color-emphasis-300: var(--custom-color-text);
+  --ifm-color-emphasis-400: var(--custom-color-text);
+  --ifm-color-emphasis-500: var(--custom-color-text);
+  --ifm-color-emphasis-600: var(--custom-color-text);
+  --ifm-color-emphasis-700: var(--custom-color-text);
+  --ifm-color-emphasis-800: var(--custom-color-text);
+  --ifm-color-emphasis-900: var(--custom-color-text);
+}
+
+/* Dark mode specific adjustments for primary color variants */
+[data-theme='dark'] {
+  --ifm-color-primary: var(--custom-color-primary);
+  --ifm-color-primary-dark: #00E090;
+  --ifm-color-primary-darker: #00CC80;
+  --ifm-color-primary-darkest: #00A060;
+  --ifm-color-primary-light: #00FFB0;
+  --ifm-color-primary-lighter: #00FFC0;
+  --ifm-color-primary-lightest: #00FFD0;
+
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.5);
+}
+
+body {
+  background-color: var(--ifm-background-color);
+  color: var(--ifm-text-color);
+}
+
+.hero--primary {
+  background: linear-gradient(135deg, var(--custom-color-primary), var(--custom-color-accent));
+  color: var(--custom-color-text);
+  text-align: center;
+}
+
+.hero__title {
+  font-size: 4rem;
+  font-weight: bold;
+  font-family: 'Orbitron', sans-serif;
+  color: var(--custom-color-text);
+}
+
+.hero__subtitle {
+  font-size: 1.5rem;
+  color: var(--custom-color-text);
+}
+
+.hero-banner-image {
+  max-width: 500px;
+  margin-top: 2rem;
+}
+
+.buttons .button {
+  background-color: var(--custom-color-primary);
+  border: none;
+  font-weight: bold;
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: var(--custom-color-secondary); /* Assuming secondary is dark for contrast */
+}
+
+.buttons .button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.features-section {
+  padding: 4rem 0;
+  background-color: var(--custom-color-background);
+  color: var(--custom-color-text);
+}
+
+.feature-card {
+  background-color: var(--custom-color-secondary); /* Use secondary for card background */
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: var(--custom-color-text);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  color: var(--custom-color-accent); /* Use accent for icons */
+  margin-bottom: 1rem;
+}
+
+/* Navbar adjustments for better contrast with dark background */
+.navbar {
+  background-color: var(--custom-color-background);
+  border-bottom: 1px solid var(--custom-color-secondary);
+}
+
+.navbar__title, .navbar__link {
+  color: var(--custom-color-text);
+}
+
+.navbar__link:hover {
+  color: var(--custom-color-primary);
+}
+
+.footer {
+  background-color: var(--custom-color-secondary);
+  color: var(--custom-color-text);
+  padding: 2rem 0;
+  border-top: 1px solid var(--custom-color-primary);
+}
+
+.footer__links {
+  margin-bottom: 2rem;
+}
+
+.footer__link-item {
+  color: var(--custom-color-text);
+  transition: color 0.2s;
+}
+
+.footer__link-item:hover {
+  color: var(--custom-color-primary);
+}
+
+.footer__copyright {
+  text-align: center;
+}
