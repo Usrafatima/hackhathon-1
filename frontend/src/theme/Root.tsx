@@ -1,8 +1,11 @@
 import BookChatWidget from "../components/chatbot";
 import React, { useState, useEffect } from 'react';
+import { useLocation } from '@docusaurus/router';
 
 function Root({ children }) {
   const [selectedText, setSelectedText] = useState<string>('');
+  const location = useLocation();
+  const showChatbot = location.pathname.startsWith('/docs');
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -22,9 +25,8 @@ function Root({ children }) {
 
   return (
     <>
-       <BookChatWidget/>
+      {showChatbot && <BookChatWidget />}
       {children}
-   
     </>
   );
 }
