@@ -1,51 +1,45 @@
-import cohere
 from qdrant_client import QdrantClient
 from typing import List
+from fastembed import TextEmbedding
 
-from src.core.config import settings
 from src.db.vector_db import COLLECTION_NAME, get_qdrant_client
-from src.pipeline.process_markdown import Document  # Re-using the Document class
+from src.pipeline.process_markdown import Document
 
 # --- CLIENTS ---
-cohere_client = cohere.Client(settings.COHERE_API_KEY)
+# The qdrant_client is initialized here. The embedding model is handled within the agent.
 qdrant_client = get_qdrant_client()
 
+# Embedding Model Configuration
+EMBEDDING_DIMENSION = 384
 
 class QdrantRetrievalAgent:
     """
-    Handles the retrieval of relevant documents from the vector store using the modern Qdrant Query API.
+    Handles the retrieval of relevant documents from the vector store using FastEmbed.
     """
 
-    def __init__(self, cohere_client, qdrant_client, collection_name: str = COLLECTION_NAME):
-        self.cohere_client = cohere_client
+    def __init__(self, qdrant_client, collection_name: str = COLLECTION_NAME):
         self.qdrant_client = qdrant_client
         self.collection_name = collection_name
+        self.embedding_model = TextEmbedding()
 
-    def execute(self, query: str, top_k: int = 50) -> List[Document]:  # ← Increased from 5 to 20
+    def execute(self, query: str, top_k: int = 50) -> List[Document]:
         """
-        Embeds a query and performs a semantic search in Qdrant using query_points.
+        Embeds a query using FastEmbed and performs a semantic search in Qdrant.
         """
         print(f"Retrieving documents for query: '{query}'")
 
-        # 1. Embed the query using Cohere — consistent with ingestion (384 dims)
-        response = self.cohere_client.embed(
-            texts=[query],
-            model="embed-english-light-v3.0",        # ← Matches ingestion: 384 dimensions
-            input_type="search_query"                # ← Correct type for queries
-        )
-        query_embedding = response.embeddings[0]
+        # 1. Embed the query using FastEmbed
+        # Convert generator to list to access the first element
+        query_embedding = list(self.embedding_model.embed([query]))[0]
 
-        # Debug: Print actual embedding dimension
-        print(f"Query embedding dimension: {len(query_embedding)}")
-
-        # 2. Use the modern query_points method (correct for qdrant-client 1.16+)
-        search_results = self.qdrant_client.query_points(
+        # 2. Use the search method for semantic search
+        search_results = self.qdrant_client.search(
             collection_name=self.collection_name,
-            query=query_embedding,       # ← 'query' parameter for dense vectors
-            limit=top_k,                 # ← Now returns up to 20 results
+            query_vector=query_embedding.tolist(),  # Convert numpy array to list
+            limit=top_k,
             with_payload=True,
-            with_vectors=False           # ← Saves bandwidth
-        ).points
+            with_vectors=False
+        )
 
         # 3. Format results into Document objects
         retrieved_docs = []
@@ -53,7 +47,7 @@ class QdrantRetrievalAgent:
             payload = result.payload or {}
             text_chunk = payload.get("text_chunk", "")
             metadata = payload.copy()
-            metadata.pop("text_chunk", None)  # Avoid duplication
+            metadata.pop("text_chunk", None)
 
             retrieved_docs.append(
                 Document(page_content=text_chunk, metadata=metadata)
