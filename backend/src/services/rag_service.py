@@ -1,14 +1,14 @@
 from typing import Dict, Any, List
-from src.services.agents.retrieval_agent import QdrantRetrievalAgent, cohere_client, qdrant_client
+from src.services.agents.retrieval_agent import QdrantRetrievalAgent, qdrant_client
 from src.services.agents.validation_agent import SimpleContextValidationAgent
-from src.services.agents.generation_agent import CohereAnswerGenerationAgent
+from src.services.agents.generation_agent import HuggingFaceGenerationAgent
 from src.models.schemas import Source
 
 class RAGOrchestrator:
     def __init__(self):
-        self.retrieval_agent = QdrantRetrievalAgent(cohere_client, qdrant_client)
+        self.retrieval_agent = QdrantRetrievalAgent(qdrant_client)
         self.validation_agent = SimpleContextValidationAgent()
-        self.generation_agent = CohereAnswerGenerationAgent()
+        self.generation_agent = HuggingFaceGenerationAgent()
 
     def execute_book_wide_chat(self, query: str) -> Dict[str, Any]:
         """

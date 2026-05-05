@@ -75,24 +75,24 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Navigate',
+          title: '📚 The Roadmap',
           items: [
             {
-              label: 'Chapters',
+              label: 'Introduction',
               to: '/docs/intro',
             },
             {
-              label: 'About',
-              to: '/about', // Assuming you have an about page
+              label: 'Module 1: ROS 2',
+              to: '/docs/Module1-The robotic-nervous-system-ros-2/intro',
             },
             {
-              label: 'Contact',
-              to: '/contact', // Assuming you have a contact page
+              label: 'Module 2: Digital Twins',
+              to: '/docs/Module2-the-digital-twins-gazebo-&-unity/intro',
             },
           ],
         },
         {
-          title: 'Community',
+          title: '🤝 Connect',
           items: [
             {
               label: 'GitHub',
@@ -102,19 +102,32 @@ const config: Config = {
               label: 'LinkedIn',
               href: 'https://www.linkedin.com/in/yusra-fatima-245967366/',
             },
+            {
+              label: 'About the Author',
+              to: '/about',
+            },
           ],
         },
         {
-          title: 'More',
+          title: '🚀 Resources',
           items: [
             {
               label: 'Blog',
               to: '/blog',
             },
+            {
+              label: 'Community Discussions',
+              href: 'https://github.com/Usrafatima',
+            },
           ],
         },
       ],
-      copyright: `Copyright © 2025 Yusra Fatima. <br/> Your guide to the future of robotics.`,
+      copyright: `
+        <div style="margin-top: 2rem; opacity: 0.6; font-size: 0.9rem;">
+          Copyright © 2025 Humanoid Robot Book. Built with Docusaurus & AI-Native Architecture.<br/>
+          Empowering the next generation of roboticists.
+        </div>
+      `,
     },
     prism: {
       theme: prismThemes.github,

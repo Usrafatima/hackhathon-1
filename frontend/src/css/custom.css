@@ -122,38 +122,65 @@ body {
 
 /* Navbar adjustments for better contrast with dark background */
 .navbar {
-  background-color: var(--custom-color-background);
-  border-bottom: 1px solid var(--custom-color-secondary);
+  background-color: rgba(15, 15, 15, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 245, 160, 0.2);
+  padding: 0.8rem 2rem;
+  transition: all 0.3s ease;
 }
 
-.navbar__title, .navbar__link {
-  color: var(--custom-color-text);
+.navbar__title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #00F5A0, #00D4FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navbar__item {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .navbar__link:hover {
   color: var(--custom-color-primary);
+  text-shadow: 0 0 10px rgba(0, 245, 160, 0.5);
+}
+
+.navbar__link--active {
+  color: var(--custom-color-primary) !important;
+}
+
+/* Global Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Orbitron', sans-serif;
 }
 
 .footer {
-  background-color: var(--custom-color-secondary);
+  background-color: #0A0A0A;
   color: var(--custom-color-text);
-  padding: 2rem 0;
-  border-top: 1px solid var(--custom-color-primary);
+  padding: 4rem 0 2rem;
+  border-top: 1px solid rgba(0, 245, 160, 0.2);
 }
 
-.footer__links {
-  margin-bottom: 2rem;
+.footer__title {
+  font-family: 'Orbitron', sans-serif;
+  color: #00D4FF;
+  letter-spacing: 1px;
 }
 
 .footer__link-item {
   color: var(--custom-color-text);
-  transition: color 0.2s;
+  opacity: 0.7;
+  transition: all 0.2s ease;
 }
 
 .footer__link-item:hover {
   color: var(--custom-color-primary);
-}
-
-.footer__copyright {
-  text-align: center;
+  opacity: 1;
+  padding-left: 5px;
 }

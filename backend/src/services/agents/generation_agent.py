@@ -1,43 +1,49 @@
+from huggingface_hub import InferenceClient
 from typing import Tuple
-from cohere import Client  # Make sure this is correct — adjust if needed
+from src.core.config import settings
 
-class CohereAnswerGenerationAgent:
-    def __init__(self, cohere_api_key: str = None):
-        # Initialize the Cohere client
-        self.client = Client(cohere_api_key or "your-api-key-here")  # Or however you pass the key
+class HuggingFaceGenerationAgent:
+    def __init__(self):
+        self.client = InferenceClient(token=settings.HUGGINGFACE_API_TOKEN)
+        # Using a recommended instruction-following model
+        self.model = "mistralai/Mistral-7B-Instruct-v0.2"
 
     def execute(self, query: str, formatted_context: str) -> Tuple[str, str]:
         """
-        Generates an answer using Cohere's new Chat API.
+        Generates an answer using the Hugging Face Inference API.
         """
-        # Extract individual documents from the formatted context
-        doc_blocks = [block.strip() for block in formatted_context.split("----------------------------------------") if block.strip()]
-        documents = []
-        for block in doc_blocks:
-            lines = block.split("\n")
-            content_lines = []
-            for line in lines:
-                if line.startswith("--- Document"):
-                    continue  # Skip the header
-                content_lines.append(line)
-            raw_text = "\n".join(content_lines).strip()
-            if raw_text:
-                documents.append({"content": raw_text})
+        system_prompt = (
+            "You are an expert assistant for the 'Humanoid Robot Book'. "
+            "Your task is to answer the user's question based *only* on the provided context document. "
+            "If the context does not contain the information needed to answer the question, you must state: "
+            "'I'm sorry, but I can't answer that based on the available context from the book.' "
+            "Do not use any external knowledge or make up information."
+        )
+
+        user_prompt = (
+            f"CONTEXT:\n{formatted_context}\n\n"
+            f"USER'S QUESTION:\n{query}"
+        )
+        
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        
+        llm_prompt_used = f"System: {system_prompt}\nUser: {user_prompt}"
 
         try:
-            response = self.client.chat(
-                model="command-r-plus",  # or "command-r", "command", etc. — use what you have access to
-                message=query,
-                documents=documents,
-                temperature=0.3,
-                max_tokens=512,
+            # Use the chat_completion method for conversational models
+            response = self.client.chat_completion(
+                messages=messages,
+                model=self.model,
+                max_tokens=1024,
+                temperature=0.1,
             )
-
-            final_response_text = response.text
-            llm_prompt_used = "Cohere Chat API - prompt not exposed"
-
+            
+            final_response_text = response.choices[0].message.content.strip()
             return final_response_text, llm_prompt_used
 
         except Exception as e:
-            print(f"Error in Cohere generation: {e}")
-            return "Sorry, I encountered an issue while generating a response.", ""
+            print(f"Error in Hugging Face generation: {e}")
+            return "Sorry, I encountered an issue while generating a response.", llm_prompt_used

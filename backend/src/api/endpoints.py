@@ -54,7 +54,11 @@ def _run_ingestion_process():
             print(f"Warning: Unexpected document type during ingestion: {type(doc)}")
 
     if all_chunks_to_upload:
-        qdrant_loader.upload_chunks(all_chunks_to_upload)
+        try:
+            qdrant_loader.upload_chunks(all_chunks_to_upload)
+        except Exception as e:
+            # Catch errors during background ingestion to prevent silent failures
+            print(f"FATAL: An unexpected error occurred during ingestion. The vector database may be incomplete. Error: {e}")
 
     print("Ingestion process completed.")
 
@@ -70,7 +74,6 @@ def ingest_content(background_tasks: BackgroundTasks):
 # -------------------------
 @router.post("/chat/book", response_model=ChatResponse)
 def chat_book(request: BookChatRequest, db: Session = Depends(get_db)):
-    # 1. Get or create chat session
     session_id = request.session_id
     if session_id is None:
         chat_session = ChatSession()
@@ -84,19 +87,13 @@ def chat_book(request: BookChatRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat session not found.")
 
     try:
-        # 2. Run RAG orchestrator
         orchestrator_response = rag_orchestrator.execute_book_wide_chat(request.query)
-        retrieved_docs = orchestrator_response.get("retrieved_context", [])  # List of MarkdownDocument objects
+        retrieved_docs = orchestrator_response.get("retrieved_context", [])
         final_response_text = orchestrator_response.get("response_text", "")
         llm_prompt_used = orchestrator_response.get("llm_prompt", "")
         is_refusal = orchestrator_response.get("is_refusal", False)
 
-        # 3. Prepare DB logging — store only text content
-        retrieved_context_payload = []
-        for doc in retrieved_docs:
-            if hasattr(doc, "page_content"):
-                retrieved_context_payload.append(doc.page_content)
-
+        retrieved_context_payload = [doc.page_content for doc in retrieved_docs if hasattr(doc, "page_content")]
         chat_message = ChatMessage(
             session_id=session_id,
             interaction_mode="book-wide",
@@ -108,40 +105,41 @@ def chat_book(request: BookChatRequest, db: Session = Depends(get_db)):
         )
         db.add(chat_message)
         db.commit()
-        db.refresh(chat_message)
 
-        # 4. Prepare API response sources and context
-        sources = []
-        retrieved_context_for_api = []
-
-        for doc in retrieved_docs:
-            if hasattr(doc, "page_content") and hasattr(doc, "metadata"):
-                text_content = doc.page_content
-                metadata = doc.metadata
-
-                retrieved_context_for_api.append(text_content)
-
-                chapter = metadata.get("chapter", "Unknown Chapter")
-                section = metadata.get("section", "Unknown Section")
-                source_url = f"/docs/{chapter}/{section}".replace(" ", "-").lower()
-
-                sources.append(Source(
-                    chapter=chapter,      # ← Fixed
-                    section=section,      # ← Fixed
-                    url=source_url
-                ))
+        sources = [
+            Source(
+                chapter=doc.metadata.get("chapter", "Unknown"),
+                section=doc.metadata.get("section", "Unknown"),
+                url=f"/docs/{doc.metadata.get('chapter', '')}/{doc.metadata.get('section', '')}".replace(" ", "-").lower()
+            )
+            for doc in retrieved_docs if hasattr(doc, "metadata")
+        ]
 
         return ChatResponse(
             response_text=final_response_text,
             sources=sources,
-            retrieved_context=retrieved_context_for_api
+            retrieved_context=retrieved_context_payload
         )
-
+    
     except Exception as e:
-        print(f"Error in chat_book: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Sorry, I'm having trouble connecting right now. Please try again in a moment."
+        error_str = str(e).lower()
+        print(f"Error in chat_book endpoint: {e}")
+        # Handle specific API errors gracefully
+        if '401' in error_str or 'authorization' in error_str:
+            error_msg = "Authentication error with the text generation service. Please check your API token."
+        elif 'model is currently loading' in error_str:
+            error_msg = "The text generation model is currently loading, please try again in a moment."
+        else:
+            # For other errors, raise a generic 500
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="An unexpected internal error occurred."
+            )
+        
+        return ChatResponse(
+            response_text=error_msg,
+            sources=[],
+            retrieved_context=[]
         )
 
 
@@ -168,12 +166,11 @@ def chat_selection(request: SelectionChatRequest, db: Session = Depends(get_db))
         llm_prompt_used = orchestrator_response.get("llm_prompt", "")
         is_refusal = orchestrator_response.get("is_refusal", False)
 
-        # Store selection context as text
-        retrieved_context_payload = []
-        retrieved_context = orchestrator_response.get("retrieved_context", [])
-        for ctx in retrieved_context:
-            if isinstance(ctx, dict) and "payload" in ctx:
-                retrieved_context_payload.append(ctx["payload"].get("raw_text", ""))
+        retrieved_context_payload = [
+            ctx["payload"].get("raw_text", "")
+            for ctx in orchestrator_response.get("retrieved_context", [])
+            if isinstance(ctx, dict) and "payload" in ctx
+        ]
 
         chat_message = ChatMessage(
             session_id=session_id,
@@ -186,21 +183,32 @@ def chat_selection(request: SelectionChatRequest, db: Session = Depends(get_db))
         )
         db.add(chat_message)
         db.commit()
-        db.refresh(chat_message)
-
-        sources: List[Source] = []
 
         return ChatResponse(
             response_text=final_response_text,
-            sources=sources,
+            sources=[],
             retrieved_context=retrieved_context_payload
         )
 
     except Exception as e:
-        print(f"Error in chat_selection: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Sorry, I'm having trouble connecting right now. Please try again in a moment."
+        error_str = str(e).lower()
+        print(f"Error in chat_selection endpoint: {e}")
+        # Handle specific API errors gracefully
+        if '401' in error_str or 'authorization' in error_str:
+            error_msg = "Authentication error with the text generation service. Please check your API token."
+        elif 'model is currently loading' in error_str:
+            error_msg = "The text generation model is currently loading, please try again in a moment."
+        else:
+            # For other errors, raise a generic 500
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="An unexpected internal error occurred."
+            )
+        
+        return ChatResponse(
+            response_text=error_msg,
+            sources=[],
+            retrieved_context=[]
         )
 
 

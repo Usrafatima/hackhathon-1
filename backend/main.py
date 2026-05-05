@@ -3,25 +3,60 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-import cohere
+from pathlib import Path
 
 from src.api.endpoints import router as api_router
 from src.db.database import engine, Base
+from src.pipeline.process_markdown import load_markdown_documents, chunk_documents, Document as MarkdownDocument
 from src.services.ingestion.load import QdrantLoader
 from src.api.middleware import exception_handler
 
 # -------------------------
 # Load environment variables
 # -------------------------
-load_dotenv()  # Load .env file
+dotenv_path = Path(os.path.dirname(__file__)) / '.env'
+load_dotenv(dotenv_path=dotenv_path)
 
-COHERE_API_KEY = os.getenv("5lkNIoDgAJ9BYWL23IwpFrgWeg3yJ6QLqZuNE4my")
-if not COHERE_API_KEY:
-    raise ValueError("Cohere API key not found in environment variables!")
+# -------------------------
+# Ingestion Logic
+# -------------------------
+def run_ingestion_on_startup():
+    """
+    Loads, chunks, and ingests markdown documents into the vector database.
+    """
+    DOCS_ROOT = "../frontend/docs"
+    print(f"Loading documents from: {DOCS_ROOT}")
+    raw_docs = load_markdown_documents(DOCS_ROOT)
+    print(f"Loaded {len(raw_docs)} documents.")
 
-# Initialize Cohere client
-co = cohere.Client(COHERE_API_KEY)
-print("Cohere client initialized successfully.")
+    if not raw_docs:
+        print("No markdown documents found to ingest.")
+        return
+
+    print("Chunking documents...")
+    chunked_docs = chunk_documents(raw_docs)
+    print(f"Created {len(chunked_docs)} chunks.")
+
+    qdrant_loader = QdrantLoader()
+
+    all_chunks_to_upload = []
+    for doc in chunked_docs:
+        if isinstance(doc, MarkdownDocument) or (hasattr(doc, "page_content") and hasattr(doc, "metadata")):
+            all_chunks_to_upload.append({
+                "raw_text": doc.page_content,
+                "metadata": doc.metadata
+            })
+        else:
+            print(f"Warning: Unexpected document type during ingestion: {type(doc)}")
+
+    if all_chunks_to_upload:
+        try:
+            qdrant_loader.upload_chunks(all_chunks_to_upload)
+        except Exception as e:
+            print(f"FATAL: An unexpected error occurred during ingestion. The vector database may be incomplete. Error: {e}")
+
+    print("Ingestion process completed.")
+
 
 # -------------------------
 # FastAPI lifespan
@@ -35,10 +70,10 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     print("Database schema initialized.")
 
-    # Initialize vector database collection
-    print("Initializing Qdrant collection...")
-    _ = QdrantLoader()
-    print("Qdrant collection initialized (or checked).")
+    # Run ingestion synchronously on startup
+    print("Starting data ingestion...")
+    run_ingestion_on_startup()
+    print("Data ingestion complete.")
 
     yield
 

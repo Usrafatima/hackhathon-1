@@ -1,18 +1,84 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
+/* Base Theme Variables & Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(0, 245, 160, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(0, 245, 160, 0.4); }
+  100% { box-shadow: 0 0 5px rgba(0, 245, 160, 0.2); }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
 .heroBanner {
-  padding: 4rem 0;
+  padding: 10rem 0;
   text-align: center;
   position: relative;
   overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.15) 0%, rgba(15, 15, 15, 1) 80%);
+  animation: fadeInUp 1s ease-out;
+}
+
+.heroBanner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwgMjQ1LCAxNjAsIDAuMDUpIi8+PC9zdmc+');
+  pointer-events: none;
+}
+
+.heroTitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 6rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+  background: linear-gradient(90deg, #00F5A0 0%, #00D4FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+.heroSubtitle {
+  font-family: 'Roboto', sans-serif;
+  font-size: 2rem;
+  color: #E8FFF5;
+  max-width: 900px;
+  margin: 0 auto 4rem;
+  line-height: 1.4;
+  font-weight: 300;
+  animation: fadeInUp 1.2s ease-out;
 }
 
 @media screen and (max-width: 996px) {
   .heroBanner {
-    padding: 2rem;
+    padding: 6rem 2rem;
+  }
+  .heroTitle {
+    font-size: 3.5rem;
+  }
+  .heroSubtitle {
+    font-size: 1.4rem;
   }
 }
 
@@ -20,4 +86,228 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 2rem;
+  animation: fadeInUp 1.4s ease-out;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #00F5A0, #00D4FF) !important;
+  color: #0A0A0A !important;
+  border: none !important;
+  padding: 1.2rem 3.5rem !important;
+  font-size: 1.3rem !important;
+  font-weight: 800 !important;
+  border-radius: 50px !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  text-decoration: none !important;
+  box-shadow: 0 10px 20px rgba(0, 245, 160, 0.2) !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.primaryButton:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 15px 30px rgba(0, 245, 160, 0.4) !important;
+  color: #0A0A0A !important;
+}
+
+/* Introduction Section */
+.introSection {
+  padding: 8rem 0;
+  background-color: #0F0F0F;
+  text-align: center;
+  border-top: 1px solid rgba(0, 245, 160, 0.1);
+}
+
+.sectionTitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem;
+  color: #00F5A0;
+  margin-bottom: 3rem;
+  position: relative;
+  display: inline-block;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, #00F5A0, #00D4FF);
+}
+
+.introText {
+  font-size: 1.3rem;
+  line-height: 2;
+  max-width: 1000px;
+  margin: 0 auto;
+  color: #E8FFF5;
+  opacity: 0.9;
+}
+
+/* Curriculum Section - 2 in a row */
+.curriculumSection {
+  padding: 8rem 0;
+  background-color: #0A0A0A;
+}
+
+.moduleGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Force 2 columns */
+  gap: 3rem;
+  margin-top: 4rem;
+}
+
+@media screen and (max-width: 768px) {
+  .moduleGrid {
+    grid-template-columns: 1fr; /* Stack on mobile */
+  }
+}
+
+.moduleCard {
+  background: #161616;
+  border: 1px solid rgba(0, 245, 160, 0.15);
+  border-radius: 30px;
+  padding: 3.5rem;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.moduleCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 0;
+  background: #00F5A0;
+  transition: height 0.4s ease;
+}
+
+.moduleCard:hover {
+  transform: translateY(-15px) scale(1.02);
+  border-color: rgba(0, 245, 160, 0.4);
+  background: #1c1c1c;
+}
+
+.moduleCard:hover::before {
+  height: 100%;
+}
+
+.moduleNumber {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  color: #00D4FF;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.moduleTitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  color: #00F5A0;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+}
+
+.moduleDescription {
+  font-size: 1.1rem;
+  color: #E8FFF5;
+  opacity: 0.8;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+/* Audience Section */
+.audienceSection {
+  padding: 8rem 0;
+  background-color: #0F0F0F;
+  text-align: center;
+  border-top: 1px solid rgba(0, 245, 160, 0.1);
+}
+
+.audienceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4rem;
+  margin-top: 4rem;
+}
+
+@media screen and (max-width: 768px) {
+  .audienceGrid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+.audienceItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.audienceItem:hover {
+  background: rgba(0, 245, 160, 0.05);
+  transform: translateY(-5px);
+}
+
+.audienceIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
+}
+
+.audienceLabel {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  color: #00D4FF;
+  font-weight: 700;
+}
+
+/* Technical Details / Stats Section */
+.statsSection {
+  padding: 6rem 0;
+  background: linear-gradient(180deg, #0A0A0A 0%, #0F0F0F 100%);
+  border-top: 1px solid rgba(0, 245, 160, 0.1);
+}
+
+.statsGrid {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.statCard {
+  text-align: center;
+  min-width: 200px;
+}
+
+.statNumber {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #00F5A0;
+}
+
+.statLabel {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #00D4FF;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }

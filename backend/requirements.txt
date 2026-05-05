@@ -8,9 +8,10 @@ SQLAlchemy
 python-jose[cryptography]
 python-multipart
 bcrypt
-cohere
+huggingface-hub
 qdrant-client>=1.7.0
 fastembed
 pydantic-settings
 psycopg2-binary
 alembic
+sentence-transformers
